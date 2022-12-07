@@ -64,6 +64,7 @@ type Props = {
   usePercentages?: boolean,
   transformScale: number,
   droppingPosition?: DroppingPosition,
+  lockedRatio?: number,
 
   className: string,
   style?: Object,
@@ -101,7 +102,8 @@ type DefaultProps = {
   minW: number,
   maxH: number,
   maxW: number,
-  transformScale: number
+  transformScale: number,
+  lockedRatio: number,
 };
 
 /**
@@ -119,6 +121,7 @@ export default class GridItem extends React.Component<Props, State> {
     margin: PropTypes.array.isRequired,
     maxRows: PropTypes.number.isRequired,
     containerPadding: PropTypes.array.isRequired,
+    lockedRatio: PropTypes.number.isRequired,
 
     // These are all in grid units
     x: PropTypes.number.isRequired,
@@ -202,7 +205,8 @@ export default class GridItem extends React.Component<Props, State> {
     minW: 1,
     maxH: Infinity,
     maxW: Infinity,
-    transformScale: 1
+    transformScale: 1,
+    lockedRatio: 0,
   };
 
   state: State = {

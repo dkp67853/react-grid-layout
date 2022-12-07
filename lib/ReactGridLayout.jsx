@@ -97,6 +97,8 @@ export default class ReactGridLayout extends React.Component<Props, State> {
     allowOverlap: false,
     isDroppable: false,
     useCSSTransforms: true,
+    lockedRatio: 0,
+    colWidth: 1,
     transformScale: 1,
     verticalCompact: true,
     compactType: "vertical",
@@ -189,6 +191,17 @@ export default class ReactGridLayout extends React.Component<Props, State> {
       };
     }
 
+    if (this.props.lockedRatio) {
+      if(!isEqual(nextProps.width, this.props.width)){
+        const {cols, margin, containerPadding} = this.props;
+        const gridItemContainerPadding = containerPadding || margin;
+        const colWidth = (nextProps.width - (margin[0] * (cols - 1)) - (gridItemContainerPadding[0] * 2)) / cols;
+        this.setState({
+          colWidth: colWidth,
+        });
+      }
+    }
+
     return null;
   }
 
@@ -220,14 +233,15 @@ export default class ReactGridLayout extends React.Component<Props, State> {
    */
   containerHeight(): ?string {
     if (!this.props.autoSize) return;
+    const rowHeight = this.props.lockedRatio ? this.state.colWidth / this.props.lockedRatio : this.props.rowHeight;
     const nbRow = bottom(this.state.layout);
     const containerPaddingY = this.props.containerPadding
       ? this.props.containerPadding[1]
       : this.props.margin[1];
     return (
-      nbRow * this.props.rowHeight +
+      Math.ceil(nbRow * rowHeight +
       (nbRow - 1) * this.props.margin[1] +
-      containerPaddingY * 2 +
+      containerPaddingY * 2) +
       "px"
     );
   }
@@ -500,7 +514,8 @@ export default class ReactGridLayout extends React.Component<Props, State> {
       rowHeight,
       maxRows,
       useCSSTransforms,
-      transformScale
+      transformScale,
+      lockedRatio
     } = this.props;
 
     // {...this.state.activeDrag} is pretty slow, actually
@@ -522,6 +537,7 @@ export default class ReactGridLayout extends React.Component<Props, State> {
         isResizable={false}
         isBounded={false}
         useCSSTransforms={useCSSTransforms}
+        lockedRatio={lockedRatio}
         transformScale={transformScale}
       >
         <div />
@@ -556,7 +572,8 @@ export default class ReactGridLayout extends React.Component<Props, State> {
       draggableCancel,
       draggableHandle,
       resizeHandles,
-      resizeHandle
+      resizeHandle,
+      lockedRatio
     } = this.props;
     const { mounted, droppingPosition } = this.state;
 
@@ -596,6 +613,7 @@ export default class ReactGridLayout extends React.Component<Props, State> {
         isResizable={resizable}
         isBounded={bounded}
         useCSSTransforms={useCSSTransforms && mounted}
+        lockedRatio={lockedRatio}
         usePercentages={!mounted}
         transformScale={transformScale}
         w={l.w}
